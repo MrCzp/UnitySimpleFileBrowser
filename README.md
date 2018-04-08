@@ -1,18 +1,18 @@
-# Unity Simple File Browser
+# Unity简易文件浏览器
 
 ![screenshot](https://yasirkula.files.wordpress.com/2016/11/simplefileexplorer.png)
 
-**Available on Asset Store:** https://www.assetstore.unity3d.com/en/#!/content/113006
+**可以从Asset Store上下载:** https://www.assetstore.unity3d.com/en/#!/content/113006
 
-**Forum Thread:** https://forum.unity.com/threads/simple-file-browser-open-source.441908/
+**论坛交流页面:** https://forum.unity.com/threads/simple-file-browser-open-source.441908/
 
 ## FEATURES
-- Behaves similar to Windows file chooser
+- 类似于windows的文件选择器
 - Costs 1 SetPass call and ~10 batches (assuming that *Sprite Packing* is enabled in *Editor Settings*)
 - Ability to search by name or filter by type
 - Quick links
-- Simple user interface
-- Draggable and resizable
+- 易用的接口
+- 可以拖动和调整窗口大小
 - Ability to choose folders instead of files
 - Supports runtime permissions on Android M+
 - Optimized using a recycled list view (makes *Instantiate* calls sparingly)
