@@ -8,14 +8,15 @@
 
 ## FEATURES
 - 类似于windows的文件选择器
-- Costs 1 SetPass call and ~10 batches (assuming that *Sprite Packing* is enabled in *Editor Settings*)
-- Ability to search by name or filter by type
-- Quick links
+- 消耗1 SetPass Call 和 〜10batches（假设编辑器设置中启用了Sprite图集）
+- 按名称搜索、按类型过滤
+- 快捷方式链接
 - 易用的接口
 - 可以拖动和调整窗口大小
-- Ability to choose folders instead of files
-- Supports runtime permissions on Android M+
-- Optimized using a recycled list view (makes *Instantiate* calls sparingly)
+- 可以选择文件夹
+- 支持安卓M+ 权限
+- 使用了循环列表进行了优化（优化实例调用）
+- 当前版本支持5.4.1+
 
 ## HOW TO
 Simply import **SimpleFileBrowser.unitypackage** to your project. Afterwards, add `using SimpleFileBrowser;` to your script.
