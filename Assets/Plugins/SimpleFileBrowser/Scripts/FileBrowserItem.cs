@@ -13,13 +13,10 @@ namespace SimpleFileBrowser
 		#region Variables
 		protected FileBrowser fileBrowser;
 
-		[SerializeField]
 		private Image background;
 
-		[SerializeField]
 		private Image icon;
 
-		[SerializeField]
 		private Text nameText;
 
 		private float prevTouchTime = Mathf.NegativeInfinity;
@@ -42,10 +39,18 @@ namespace SimpleFileBrowser
 
 		private bool m_isDirectory;
 		public bool IsDirectory { get { return m_isDirectory; } }
-		#endregion
+        #endregion
 
-		#region Initialization Functions
-		public void SetFileBrowser( FileBrowser fileBrowser )
+        private void Awake()
+        {
+            background = GetComponent<Image>();
+            icon = transform.FindChild("Icon").GetComponent<Image>();
+            nameText = transform.FindChild("Name").GetComponent<Text>();
+        }
+
+
+        #region Initialization Functions
+        public void SetFileBrowser( FileBrowser fileBrowser )
 		{
 			this.fileBrowser = fileBrowser;
 		}

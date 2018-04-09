@@ -8,6 +8,7 @@ using System.Collections.Generic;
 
 namespace SimpleFileBrowser
 {
+    [DisallowMultipleComponent]
     public class FileBrowser : MonoBehaviour, IListViewAdapter
     {
         public enum Permission { Denied = 0, Granted = 1, ShouldAsk = 2 };
@@ -163,55 +164,40 @@ namespace SimpleFileBrowser
         #region Variables
         [Header("References")]
 
-        [SerializeField]
+       // [SerializeField]
         private FileBrowserItem itemPrefab;
 
-        [SerializeField]
         private FileBrowserQuickLink quickLinkPrefab;
 
         private List<FileSystemInfo> allItems = new List<FileSystemInfo>();
         private List<FileSystemInfo> validItems = new List<FileSystemInfo>();
 
-        [SerializeField]
         private Text titleText;
 
-        [SerializeField]
         private InputField pathInputField;
 
-        [SerializeField]
         private InputField searchInputField;
 
-        [SerializeField]
         private RectTransform quickLinksContainer;
 
-        [SerializeField]
         private RectTransform filesContainer;
 
-        [SerializeField]
         private ScrollRect filesScrollRect;
 
-        [SerializeField]
         private RecycledListView listView;
 
-        [SerializeField]
         private InputField filenameInputField;
 
-        [SerializeField]
         private Image filenameImage;
 
-        [SerializeField]
         private Dropdown filtersDropdown;
 
-        [SerializeField]
         private RectTransform filtersDropdownContainer;
 
-        [SerializeField]
         private Text filterItemTemplate;
 
-        [SerializeField]
         private Toggle showHiddenFilesToggle;
 
-        [SerializeField]
         private Text submitButtonText;
 
         [Header("Icons")]
@@ -237,7 +223,7 @@ namespace SimpleFileBrowser
         public Color selectedFileColor = new Color32(0, 175, 255, 255);
 
         public Color wrongFilenameColor = new Color32(255, 100, 100, 255);
-
+        [Tooltip("this window min size")]
         public int minWidth = 380;
         public int minHeight = 300;
 
@@ -436,8 +422,12 @@ namespace SimpleFileBrowser
         void Awake()
         {
             m_instance = this;
-
+            InitRerences();
+            itemPrefab = CreateFbItem();
+            quickLinkPrefab = CreateQuickLink();
             itemHeight = ((RectTransform)itemPrefab.transform).sizeDelta.y;
+            itemPrefab.gameObject.SetActive(false);
+            quickLinkPrefab.gameObject.SetActive(false);
             nullPointerEventData = new UnityEngine.EventSystems.PointerEventData(null);
 
 #if !UNITY_EDITOR && UNITY_IOS
@@ -461,6 +451,32 @@ namespace SimpleFileBrowser
             filters.Add(allFilesFilter);
 
             listView.SetAdapter(this);
+            
+        }
+
+        /// <summary>
+        /// 初始化引用
+        /// </summary>
+        void InitRerences()
+        {
+            titleText = transform.FindChild("Root/TitleBar/Text").GetComponent<Text>();
+            pathInputField = transform.FindChild("Root/Padding/TopView/PathInputField").GetComponent<InputField>();
+            searchInputField = transform.FindChild("Root/Padding/TopView/SearchInputField").GetComponent<InputField>();
+
+            var midViewRoot = transform.FindChild("Root/Padding/MidView/Padding").transform;
+            quickLinksContainer = midViewRoot.FindChild("QuickLinks/Viewport/QuickLinksContainer").GetComponent<RectTransform>();
+            filesScrollRect = midViewRoot.FindChild("Files").GetComponent<ScrollRect>();
+            listView = midViewRoot.FindChild("Files").GetComponent<RecycledListView>();
+            filesContainer = midViewRoot.FindChild("Files/Viewport/FilesContainer").GetComponent<RectTransform>();
+
+            var bottomViewRoot = transform.FindChild("Root/Padding/BottonView/Padding").transform;
+            filenameInputField = bottomViewRoot.FindChild("TopRow/FilenameInputField").GetComponent<InputField>();
+            filenameImage = bottomViewRoot.FindChild("TopRow/FilenameInputField").GetComponent<Image>();
+            filtersDropdown = bottomViewRoot.FindChild("TopRow/FilterDropdown").GetComponent<Dropdown>();
+            filtersDropdownContainer = bottomViewRoot.FindChild("TopRow/FilterDropdown/Template").GetComponent<RectTransform>();
+            filterItemTemplate = bottomViewRoot.FindChild("TopRow/FilterDropdown/Template/Viewport/Content/Item/Item Label").GetComponent<Text>();
+            showHiddenFilesToggle = bottomViewRoot.FindChild("BottomRow/ShowHiddenFilesToggle").GetComponent<Toggle>();
+            submitButtonText = bottomViewRoot.FindChild("BottomRow/SubmitButton/Text").GetComponent<Text>();
         }
 
         void OnApplicationFocus(bool focus)
@@ -479,9 +495,71 @@ namespace SimpleFileBrowser
         public ListItem CreateItem()
         {
             FileBrowserItem item = (FileBrowserItem)Instantiate(itemPrefab, filesContainer, false);
+            item.gameObject.SetActive(true);
             item.SetFileBrowser(this);
-
             return item;
+        }
+
+
+        FileBrowserItem CreateFbItem()
+        {
+            var item = new GameObject("Item");
+            item.AddComponent<Image>();
+            item.transform.SetParent(filesContainer);
+            var rect = item.GetComponent<RectTransform>();
+            SetAnchorsAndPivot(rect, new Vector2(0, 1), Vector2.one, new Vector2(0, 1), Vector2.zero,Vector2.zero);
+            rect.sizeDelta = new Vector2(rect.sizeDelta.x, 30);
+            item.transform.localPosition = new Vector2(item.transform.localPosition.x,15);
+            CreateItemIcon(item.transform);
+            CreateItemName(item.transform);
+            var newItem = item.AddComponent<FileBrowserItem>();
+            return newItem;
+        }
+
+        void CreateItemIcon(Transform parent)
+        {
+            var item = new GameObject("Icon");
+            item.AddComponent<Image>();
+            item.transform.SetParent(parent);
+            var rect = item.GetComponent<RectTransform>();
+            SetAnchorsAndPivot(rect, Vector2.zero, new Vector2(0, 1), new Vector2(.5f, .5f) ,new Vector2(rect.offsetMin.x,3), new Vector2(rect.offsetMax.x, 3));
+            rect.sizeDelta = new Vector2(30, rect.sizeDelta.y);
+            rect.localPosition = new Vector2(19,item.transform.localPosition.y);
+        }
+
+        void CreateItemName(Transform parent)
+        {
+            var item = new GameObject("Name");
+            var text = item.AddComponent<Text>();
+            text.color = Color.black;
+            text.font = Resources.GetBuiltinResource<Font>("Arial.ttf") as Font;
+            item.transform.SetParent(parent);
+            var rect = item.GetComponent<RectTransform>();
+            SetAnchorsAndPivot(rect, Vector2.zero, Vector2.one, new Vector2(.5f, .5f), new Vector2(38,2), new Vector2(0, 2));
+        }
+
+        void SetAnchorsAndPivot(RectTransform rect,Vector2 anchorMin,Vector2 anchorMax, Vector2 pivot,Vector2 offsetMin,Vector2 offsetMax)
+        {
+            rect.anchorMin = anchorMin;
+            rect.anchorMax = anchorMax;
+            rect.pivot = pivot;
+            rect.offsetMax = offsetMax;
+            rect.offsetMin = offsetMin;
+        }
+
+        FileBrowserQuickLink CreateQuickLink()
+        {
+            var item = new GameObject("Link");
+            item.AddComponent<Image>();
+            item.transform.SetParent(quickLinksContainer);
+            var rect = item.GetComponent<RectTransform>();
+            SetAnchorsAndPivot(rect, new Vector2(0, 1), Vector2.one, new Vector2(0, 1), Vector2.zero, Vector2.zero);
+            rect.sizeDelta = new Vector2(rect.sizeDelta.x, 30);
+            item.transform.localPosition = new Vector2(item.transform.localPosition.x, 0);
+            CreateItemIcon(item.transform);
+            CreateItemName(item.transform);
+            var newItem = item.AddComponent<FileBrowserQuickLink>();
+            return newItem;
         }
 
         public void SetItemContent(ListItem item)
@@ -873,6 +951,7 @@ namespace SimpleFileBrowser
                 return false;
 
             FileBrowserQuickLink quickLink = (FileBrowserQuickLink)Instantiate(quickLinkPrefab, quickLinksContainer, false);
+            quickLink.gameObject.SetActive(true);
             quickLink.SetFileBrowser(this);
 
             if (icon != null)
